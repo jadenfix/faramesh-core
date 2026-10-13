@@ -1,6 +1,6 @@
 {
-  "captured_source_commit": "3f7c8c73d447170c59af81a5baea77db842e1f68",
-  "captured_source_tree": "b54a1a83417ada4b7d23c99089223521e544756e",
+  "captured_source_commit": "314173f0ff45dd421682037e78c1692c60202a6b",
+  "captured_source_tree": "f40393ed52cf7f197deb173b4a13b18cbfde3de5",
   "runtime_inputs": {
     "cmd/faramesh/agent.go": "a3b3f6ab2c81fd4f0292bb5097e4a5e0981c6578",
     "cmd/faramesh/audit.go": "824bbf1433b8de937e9b189143361de2bea9b0ce",
@@ -270,7 +270,8 @@
     "internal/core/sandbox/proxy_darwin.go": "aa3b5fcba0e084c780f5cec372e6a7a2fc406b47",
     "internal/core/sandbox/proxy_windows.go": "0e19d1a11279937c6fd2a2d66f155c741efecb14",
     "internal/core/sandbox/sandbox.go": "5ba173720188ac56d5f2bc6739e78d928fcc9d44",
-    "internal/core/sandbox/seccomp_linux.go": "36fc4658c79ee8d6df1a8d93243559726ff1b4ad",
+    "internal/core/sandbox/seccomp_linux.go": "08a7994c5b8358b2d4b53bd39235f8e915351bf1",
+    "internal/core/sandbox/seccomp_linux_test.go": "66b171159fd888a7c20033582bb6a392f341b19c",
     "internal/core/sandbox/seccomp_other.go": "9a4a4b6089806186e9eb52b6e449112fe88dc60f",
     "internal/core/session/backend.go": "6364cc791526ead28b3d98c48c02085bc9cbb457",
     "internal/core/session/daily_store_sqlite.go": "2f4dc93e40ef6b5f315387653a5b384475051d36",
