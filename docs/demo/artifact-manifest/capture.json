@@ -13,8 +13,8 @@
       "sha256": "849175b5f0a048943f11eae849be22d9136f51b150c99d6063c79bc278c66223"
     }
   },
-  "captured_source_commit": "c70116477e0c989750ce9413ff987b561af3a084",
-  "captured_source_tree": "2c8d5247982599b5b98abe4e7fbc55990f559e52",
+  "captured_source_commit": "d24fb6d20916b7e58b2c4749bed664d5333f6e4e",
+  "captured_source_tree": "0f53e13bc69527e4c2bbce7e0bea2d2b428c80f1",
   "command": "bash tests/artifact_manifest_containment.sh",
   "schema": 1,
   "scope": "Provider-free local CLI artifact verification; no live service or performance claim.",
