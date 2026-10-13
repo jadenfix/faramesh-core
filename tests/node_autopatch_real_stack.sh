@@ -211,6 +211,11 @@ run_cmd npm --prefix "$ROOT_DIR/sdk/node" ci --no-audit --no-fund
 run_cmd npm --prefix "$ROOT_DIR/sdk/node" run build
 
 run_cmd go build -o "$BIN_PATH" ./cmd/faramesh
+NODE_SECCOMP_SMOKE_OUTPUT="$($BIN_PATH run -- node -e 'process.stdout.write("node-seccomp-ok")')"
+if [[ "$NODE_SECCOMP_SMOKE_OUTPUT" != "node-seccomp-ok" ]]; then
+  echo "node seccomp smoke returned unexpected output: $NODE_SECCOMP_SMOKE_OUTPUT" >&2
+  exit 1
+fi
 run_cmd "$BIN_PATH" verify manifest-generate --base-dir "$ROOT_DIR" --output "$INTEGRITY_MANIFEST_PATH" "$POLICY_PATH"
 "$BIN_PATH" verify buildinfo --emit >"$BUILDINFO_EXPECTED_PATH"
 
