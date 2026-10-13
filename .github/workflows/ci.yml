@@ -99,6 +99,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Install media verification tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
       - name: Verify source pin, media bytes, and full decode
         run: python scripts/verify_artifact_manifest_demo.py
 
