@@ -11,9 +11,10 @@ func TestDefaultAgentSyscallsIncludeNodeRuntimePrimitives(t *testing.T) {
 	}
 
 	// Modern Node/libuv needs clone3 for worker creation, epoll_pwait for its
-	// event loop, and madvise while initializing V8. Returning EPERM for these
-	// calls causes native assertions or a segmentation fault before user code.
-	for _, name := range []string{"clone3", "epoll_pwait", "madvise"} {
+	// event loop, madvise while initializing V8, and getsockopt to complete a
+	// nonblocking socket connection. Returning EPERM for these calls causes
+	// native assertions, a segmentation fault, or an opaque connection error.
+	for _, name := range []string{"clone3", "epoll_pwait", "madvise", "getsockopt"} {
 		if _, ok := allowed[name]; !ok {
 			t.Errorf("default agent syscall allowlist is missing %q", name)
 		}
