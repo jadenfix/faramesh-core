@@ -75,6 +75,33 @@ jobs:
           name: coverage
           path: coverage.out
 
+  artifact-manifest-e2e:
+    name: Artifact Manifest Containment E2E
+    runs-on: ubuntu-latest
+    needs: [top-level-allowlist]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Run real CLI manifest workflow
+        run: bash tests/artifact_manifest_containment.sh
+
+  artifact-demo-integrity:
+    name: Artifact Demo Integrity
+    runs-on: ubuntu-latest
+    needs: [artifact-manifest-e2e]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Verify source pin, media bytes, and full decode
+        run: python scripts/verify_artifact_manifest_demo.py
+
   python-sdk-tests:
     name: Python SDK Tests
     runs-on: ubuntu-latest
