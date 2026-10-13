@@ -1,0 +1,8 @@
+[build] compiling current Faramesh source
+[1/3] generate and verify a confined release manifest
+✓ all 1 artifacts match manifest
+[2/3] detect content tampering
+DENY modified artifact: digest mismatch
+[3/3] reject a same-content symlink escaping --base-dir
+DENY escaping symlink: resolved path escapes base-dir
+PASS artifact manifest containment

@@ -35,6 +35,20 @@ tamper-evident decision evidence for audit and compliance.
   <sub>Governance demo view: policy, enforcement, and runtime workflow at a glance.</sub>
 </p>
 
+### Verified artifact-integrity workflow
+
+<p align="center">
+  <img src="docs/demo/artifact-manifest/artifact-manifest.gif" alt="Faramesh CLI verifies a confined release manifest, rejects content tampering, and blocks a same-content symlink escape" width="960" />
+</p>
+
+This recording is generated from the real provider-free CLI workflow in
+`tests/artifact_manifest_containment.sh`. It demonstrates a valid manifest,
+digest-tamper rejection, and rejection of a symlink that resolves outside
+`--base-dir`. The capture pins the exact source tree and includes a reproducible
+receipt plus media-integrity verification; it does not claim live-service or
+performance results. [MP4](docs/demo/artifact-manifest/artifact-manifest.mp4) ·
+[capture receipt](docs/demo/artifact-manifest/capture.json)
+
 <p align="center">
   <a href="#install"><img src="https://img.shields.io/badge/Install-Start%20Here-111111?style=flat-square" alt="Install" /></a>
   <a href="#quick-start"><img src="https://img.shields.io/badge/Quick%20Start-One%20Command-111111?style=flat-square" alt="Quick Start" /></a>
