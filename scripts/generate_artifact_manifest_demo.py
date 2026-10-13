@@ -16,7 +16,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "docs" / "demo" / "artifact-manifest"
-SOURCE_COMMIT = "d24fb6d20916b7e58b2c4749bed664d5333f6e4e"
+SOURCE_COMMIT = "3f7c8c73d447170c59af81a5baea77db842e1f68"
 WIDTH, HEIGHT = 1280, 720
 FPS = 12
 
@@ -83,7 +83,7 @@ def frame(lines: list[tuple[str, str]], step: int, tick: int, total: int) -> Ima
 def main() -> None:
     if run("git", "status", "--porcelain", "--", "cmd", "internal", "go.mod", "go.sum", "tests/artifact_manifest_containment.sh").strip():
         raise SystemExit("runtime inputs differ from captured source; commit or restore them first")
-    if run("git", "rev-parse", f"{SOURCE_COMMIT}^{{tree}}").strip() != "0f53e13bc69527e4c2bbce7e0bea2d2b428c80f1":
+    if run("git", "rev-parse", f"{SOURCE_COMMIT}^{{tree}}").strip() != "b54a1a83417ada4b7d23c99089223521e544756e":
         raise SystemExit("captured source tree mismatch")
 
     env = os.environ.copy()

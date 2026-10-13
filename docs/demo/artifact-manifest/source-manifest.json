@@ -1,6 +1,6 @@
 {
-  "captured_source_commit": "d24fb6d20916b7e58b2c4749bed664d5333f6e4e",
-  "captured_source_tree": "0f53e13bc69527e4c2bbce7e0bea2d2b428c80f1",
+  "captured_source_commit": "3f7c8c73d447170c59af81a5baea77db842e1f68",
+  "captured_source_tree": "b54a1a83417ada4b7d23c99089223521e544756e",
   "runtime_inputs": {
     "cmd/faramesh/agent.go": "a3b3f6ab2c81fd4f0292bb5097e4a5e0981c6578",
     "cmd/faramesh/audit.go": "824bbf1433b8de937e9b189143361de2bea9b0ce",
@@ -104,8 +104,8 @@
     "internal/adapter/proxy/inference_routes.go": "2ddf910fe533ec40fab27d4fe4e4083112307d28",
     "internal/adapter/proxy/server.go": "487d331cd98c8df577167e1f04452ad7b1309a8c",
     "internal/adapter/proxy/server_test.go": "25b53d9146993c2fa96821e4c49ab179f9fcf35b",
-    "internal/adapter/sdk/server.go": "fe8f7e8f0b7173414a917f344744d6af5d0384ae",
-    "internal/adapter/sdk/server_test.go": "68ecb475f9f68c9e011ada2af89bea7ac7dacce1",
+    "internal/adapter/sdk/server.go": "0a9d071f5d325cef0a7a2951f335bc946ee35fa9",
+    "internal/adapter/sdk/server_test.go": "d66f65564235cada41e9722834c2f073d21c9da2",
     "internal/adapter/serverless/authorize.go": "b79a27b9f932905a9350daf81f99bff2f7a0d136",
     "internal/adapter/serverless/authorize_test.go": "9931cef97159a12bdfe8b97fcd9a4bcea46a291c",
     "internal/adapter/serverless/handler.go": "264532cea7061a199156093e32fbf3623c5786cc",
