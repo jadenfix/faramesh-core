@@ -44,12 +44,11 @@ func VerifyManifest(baseDir string, m *ManifestV1) error {
 	baseDir = filepath.Clean(baseDir)
 	var errs []string
 	for _, a := range m.Artifacts {
-		p := filepath.Clean(a.Path)
-		if p == ".." || strings.HasPrefix(p, ".."+string(filepath.Separator)) {
-			errs = append(errs, fmt.Sprintf("%q: invalid path", a.Path))
+		full, err := confinedArtifactPath(baseDir, a.Path)
+		if err != nil {
+			errs = append(errs, fmt.Sprintf("%q: %v", a.Path, err))
 			continue
 		}
-		full := filepath.Join(baseDir, p)
 		got, err := FileSHA256Hex(full)
 		if err != nil {
 			errs = append(errs, fmt.Sprintf("%s: %v", a.Path, err))
@@ -103,7 +102,11 @@ func BuildManifestV1(baseDir string, filePaths []string) (*ManifestV1, error) {
 		if rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
 			return nil, fmt.Errorf("file %q is not under base-dir %q", p, baseDir)
 		}
-		h, err := FileSHA256Hex(absFile)
+		confined, err := confinedArtifactPath(absBase, rel)
+		if err != nil {
+			return nil, fmt.Errorf("file %q: %w", p, err)
+		}
+		h, err := FileSHA256Hex(confined)
 		if err != nil {
 			return nil, err
 		}
@@ -111,6 +114,40 @@ func BuildManifestV1(baseDir string, filePaths []string) (*ManifestV1, error) {
 	}
 	sort.Slice(arts, func(i, j int) bool { return arts[i].Path < arts[j].Path })
 	return &ManifestV1{Version: 1, Artifacts: arts}, nil
+}
+
+// confinedArtifactPath resolves path beneath baseDir and verifies that symlinks
+// cannot redirect manifest reads outside the declared base directory.
+func confinedArtifactPath(baseDir, path string) (string, error) {
+	if path == "" || filepath.IsAbs(path) || filepath.VolumeName(path) != "" {
+		return "", fmt.Errorf("invalid relative path")
+	}
+
+	clean := filepath.Clean(filepath.FromSlash(path))
+	if clean == "." || clean == ".." || strings.HasPrefix(clean, ".."+string(filepath.Separator)) {
+		return "", fmt.Errorf("invalid relative path")
+	}
+
+	absBase, err := filepath.Abs(baseDir)
+	if err != nil {
+		return "", fmt.Errorf("resolve base-dir: %w", err)
+	}
+	realBase, err := filepath.EvalSymlinks(absBase)
+	if err != nil {
+		return "", fmt.Errorf("resolve base-dir: %w", err)
+	}
+	realTarget, err := filepath.EvalSymlinks(filepath.Join(absBase, clean))
+	if err != nil {
+		return "", err
+	}
+	rel, err := filepath.Rel(realBase, realTarget)
+	if err != nil {
+		return "", fmt.Errorf("resolve artifact: %w", err)
+	}
+	if rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return "", fmt.Errorf("resolved path escapes base-dir")
+	}
+	return realTarget, nil
 }
 
 // MarshalManifestJSONPretty returns indented JSON for a manifest.

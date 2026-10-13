@@ -211,6 +211,11 @@ run_cmd npm --prefix "$ROOT_DIR/sdk/node" ci --no-audit --no-fund
 run_cmd npm --prefix "$ROOT_DIR/sdk/node" run build
 
 run_cmd go build -o "$BIN_PATH" ./cmd/faramesh
+NODE_SECCOMP_SMOKE_OUTPUT="$($BIN_PATH run -- node -e 'process.stdout.write("node-seccomp-ok")')"
+if [[ "$NODE_SECCOMP_SMOKE_OUTPUT" != "node-seccomp-ok" ]]; then
+  echo "node seccomp smoke returned unexpected output: $NODE_SECCOMP_SMOKE_OUTPUT" >&2
+  exit 1
+fi
 run_cmd "$BIN_PATH" verify manifest-generate --base-dir "$ROOT_DIR" --output "$INTEGRITY_MANIFEST_PATH" "$POLICY_PATH"
 "$BIN_PATH" verify buildinfo --emit >"$BUILDINFO_EXPECTED_PATH"
 
@@ -228,6 +233,38 @@ DAEMON_PID=$!
 
 wait_for_daemon
 
+NODE_SOCKET_SMOKE_OUTPUT="$(
+  FARAMESH_SOCKET="$SOCKET_PATH" \
+  FARAMESH_AGENT_ID="$AGENT_ID" \
+  "$BIN_PATH" --daemon-socket "$SOCKET_PATH" run -- node -e '
+    const net = require("net");
+    const client = net.createConnection({ path: process.env.FARAMESH_SOCKET }, () => {
+      client.write(JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "govern",
+        params: { agent_id: process.env.FARAMESH_AGENT_ID, tool: "http", operation: "get", args: {} }
+      }) + "\n");
+    });
+    let data = "";
+    client.on("data", chunk => {
+      data += chunk.toString();
+      if (data.includes("\n")) client.end();
+    });
+    client.on("end", () => {
+      const response = JSON.parse(data.trim());
+      if (!response.result || response.result.effect !== "PERMIT") process.exit(2);
+      process.stdout.write("node-socket-ok");
+    });
+    client.on("error", err => { console.error(err); process.exit(3); });
+    client.setTimeout(5000, () => { console.error("socket timeout"); client.destroy(); process.exit(4); });
+  '
+)"
+if [[ "$NODE_SOCKET_SMOKE_OUTPUT" != "node-socket-ok" ]]; then
+  echo "node socket smoke returned unexpected output: $NODE_SOCKET_SMOKE_OUTPUT" >&2
+  exit 1
+fi
+
 FARAMESH_SOCKET="$SOCKET_PATH" \
 FARAMESH_AGENT_ID="$AGENT_ID" \
 FARAMESH_NODE_AUTOPATCH_PATH="$ROOT_DIR/sdk/node/dist/autopatch.js" \
@@ -241,6 +278,7 @@ path = sys.argv[1]
 patched = False
 steps = {}
 tokens = {}
+messages = {}
 
 with open(path, "r", encoding="utf-8") as fh:
     for line in fh:
@@ -255,6 +293,7 @@ with open(path, "r", encoding="utf-8") as fh:
             patched = bool(payload.get("patched"))
         elif payload.get("event") == "step":
             steps[payload.get("step")] = payload.get("status")
+            messages[payload.get("step")] = payload.get("message", "")
         elif payload.get("event") == "token":
             tokens[payload.get("step")] = payload.get("token", "")
 
@@ -271,7 +310,8 @@ if not patched:
 for step, want in expected.items():
     got = steps.get(step)
     if got != want:
-        raise SystemExit(f"step {step} expected {want}, got {got}")
+        detail = messages.get(step, "")
+        raise SystemExit(f"step {step} expected {want}, got {got}: {detail}")
 
 approve = tokens.get("defer_approve", "")
 deny = tokens.get("defer_deny", "")

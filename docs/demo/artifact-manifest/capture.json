@@ -1,0 +1,28 @@
+{
+  "artifacts": {
+    "artifact-manifest-poster.png": {
+      "bytes": 36341,
+      "sha256": "39d5d85c5b7e25edb29da830752b4a5e15b7020dc59560e2e63e8d5fe1006f69"
+    },
+    "artifact-manifest.gif": {
+      "bytes": 1240584,
+      "sha256": "2bc64eb1b6ec0bc9e9a7d954b42a909ff2bc53cfc4eda22efb82ab3818462dfe"
+    },
+    "artifact-manifest.mp4": {
+      "bytes": 75675,
+      "sha256": "849175b5f0a048943f11eae849be22d9136f51b150c99d6063c79bc278c66223"
+    }
+  },
+  "captured_source_commit": "d126617d9bcdb08dd3917ec3cb3ed28ff7dbe335",
+  "captured_source_tree": "92c4ec15e5376b8558704add12de69f96b7f4b83",
+  "command": "bash tests/artifact_manifest_containment.sh",
+  "schema": 1,
+  "scope": "Provider-free local CLI artifact verification; no live service or performance claim.",
+  "video": {
+    "fps": 12,
+    "frames": 96,
+    "height": 720,
+    "width": 1280
+  },
+  "workflow_output_sha256": "48d211898512b87fc5cbf3399cd7c2aafe053e05c7b94bc7e10ebb7849434556"
+}

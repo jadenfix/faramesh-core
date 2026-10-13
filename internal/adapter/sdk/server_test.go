@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -769,6 +770,9 @@ func TestListenReusesStaleSocketFile(t *testing.T) {
 	if err != nil {
 		t.Skipf("unable to allocate unix socket: %v", err)
 	}
+	if unixListener, ok := staleListener.(*net.UnixListener); ok {
+		unixListener.SetUnlinkOnClose(false)
+	}
 	if err := staleListener.Close(); err != nil {
 		t.Fatalf("close stale listener: %v", err)
 	}
@@ -787,6 +791,59 @@ func TestListenReusesStaleSocketFile(t *testing.T) {
 		t.Fatalf("dial recovered listener: %v", err)
 	}
 	_ = conn.Close()
+}
+
+func TestCloseSynchronizesAcceptLoopAndHandlers(t *testing.T) {
+	serverConn, clientConn := net.Pipe()
+	_ = clientConn.Close()
+	listener := &closeReleasedListener{
+		conn:     serverConn,
+		closed:   make(chan struct{}),
+		accepted: make(chan struct{}),
+	}
+	srv := NewServer(core.NewPipeline(core.Config{}), zap.NewNop())
+	srv.listener = listener
+	srv.acceptDone = make(chan struct{})
+	go srv.accept()
+
+	if err := srv.Close(); err != nil {
+		t.Fatalf("close: %v", err)
+	}
+	select {
+	case <-listener.accepted:
+	default:
+		t.Fatal("Close returned before the accept loop consumed its final connection")
+	}
+}
+
+// closeReleasedListener models the shutdown edge where Accept returns one final
+// connection after Close. That ordering used to let accept call WaitGroup.Add
+// concurrently with Server.Close calling WaitGroup.Wait.
+type closeReleasedListener struct {
+	conn     net.Conn
+	closed   chan struct{}
+	accepted chan struct{}
+	once     sync.Once
+}
+
+func (l *closeReleasedListener) Accept() (net.Conn, error) {
+	<-l.closed
+	if l.conn == nil {
+		return nil, net.ErrClosed
+	}
+	conn := l.conn
+	l.conn = nil
+	close(l.accepted)
+	return conn, nil
+}
+
+func (l *closeReleasedListener) Close() error {
+	l.once.Do(func() { close(l.closed) })
+	return nil
+}
+
+func (l *closeReleasedListener) Addr() net.Addr {
+	return &net.UnixAddr{Name: "close-released-listener", Net: "unix"}
 }
 
 type testSocketClient struct {

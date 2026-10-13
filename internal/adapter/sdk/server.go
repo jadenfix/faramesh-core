@@ -366,6 +366,7 @@ type Server struct {
 	subs       []chan auditEvent
 	cbSubs     []chan callbackEvent
 	wg         sync.WaitGroup
+	acceptDone chan struct{}
 	rlMu       sync.Mutex
 	rl         map[string]*rate.Limiter
 	connTokens chan struct{}
@@ -430,6 +431,7 @@ func (s *Server) Listen(socketPath string) error {
 		return fmt.Errorf("chmod socket: %w", err)
 	}
 	s.listener = ln
+	s.acceptDone = make(chan struct{})
 	s.log.Info("SDK adapter listening", zap.String("socket", socketPath))
 	go s.accept()
 	return nil
@@ -530,6 +532,12 @@ func (s *Server) Close() error {
 	if s.listener != nil {
 		closeErr = s.listener.Close()
 	}
+	// Wait for the accept loop to stop before waiting on connection handlers.
+	// accept is the only goroutine that adds to wg, and sync.WaitGroup forbids
+	// Add racing with Wait when the counter may be zero.
+	if s.acceptDone != nil {
+		<-s.acceptDone
+	}
 	done := make(chan struct{})
 	go func() {
 		s.wg.Wait()
@@ -544,6 +552,7 @@ func (s *Server) Close() error {
 }
 
 func (s *Server) accept() {
+	defer close(s.acceptDone)
 	for {
 		conn, err := s.listener.Accept()
 		if err != nil {
