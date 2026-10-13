@@ -109,19 +109,19 @@ func buildBPFFilter(allowed map[uint32]bool) []syscall.SockFilter {
 		// BPF_JMP+BPF_JEQ: if nr == allowed, skip to ALLOW
 		skipToAllow := uint8(len(allowed)) // approximate; recalculated below
 		prog = append(prog, syscall.SockFilter{
-			Code: 0x15,           // JEQ
+			Code: 0x15, // JEQ
 			Jt:   skipToAllow,
 			K:    nr,
 		})
 	}
 	// Default: SECCOMP_RET_ERRNO | EPERM
 	prog = append(prog, syscall.SockFilter{
-		Code: 0x06, // RET
+		Code: 0x06,       // RET
 		K:    0x00050001, // SECCOMP_RET_ERRNO | 1 (EPERM)
 	})
 	// ALLOW: SECCOMP_RET_ALLOW
 	prog = append(prog, syscall.SockFilter{
-		Code: 0x06, // RET
+		Code: 0x06,       // RET
 		K:    0x7fff0000, // SECCOMP_RET_ALLOW
 	})
 
@@ -150,7 +150,8 @@ func syscallNumber(name string) (uint32, bool) {
 		"listen": 50, "getsockname": 51, "getpeername": 52,
 		"clone": 56, "fork": 57, "execve": 59, "exit": 60,
 		"wait4": 61, "kill": 62, "uname": 63,
-		"fcntl": 72, "flock": 73, "fsync": 74, "fdatasync": 75,
+		"arch_prctl": 158,
+		"fcntl":      72, "flock": 73, "fsync": 74, "fdatasync": 75,
 		"getcwd": 79, "chdir": 80, "mkdir": 83, "rmdir": 84,
 		"unlink": 87, "readlink": 89, "chmod": 90,
 		"getuid": 102, "getgid": 104, "geteuid": 107, "getegid": 108,
@@ -177,6 +178,7 @@ func defaultAgentSyscalls() []string {
 		"getpid", "socket", "connect", "accept", "sendto", "recvfrom",
 		"bind", "listen", "getsockname", "getpeername",
 		"clone", "fork", "execve", "exit", "wait4", "kill", "uname",
+		"arch_prctl",
 		"fcntl", "flock", "fsync", "fdatasync", "getcwd", "chdir",
 		"mkdir", "rmdir", "unlink", "readlink", "chmod",
 		"getuid", "getgid", "geteuid", "getegid", "getppid", "setsid",

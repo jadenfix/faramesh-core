@@ -769,6 +769,9 @@ func TestListenReusesStaleSocketFile(t *testing.T) {
 	if err != nil {
 		t.Skipf("unable to allocate unix socket: %v", err)
 	}
+	if unixListener, ok := staleListener.(*net.UnixListener); ok {
+		unixListener.SetUnlinkOnClose(false)
+	}
 	if err := staleListener.Close(); err != nil {
 		t.Fatalf("close stale listener: %v", err)
 	}
